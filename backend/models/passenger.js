@@ -1,6 +1,6 @@
 const uuid = require('uuid');
 const { Spanner } = require('@google-cloud/spanner');
-const { instanceId, databaseId } = require('../db/bd.config');
+const { projectId, instanceId, databaseId } = require('../db/bd.config');
 
 const spanner = new Spanner({ projectId });
 
@@ -22,7 +22,7 @@ module.exports.getPassengers = async (name) => {
           : ''
       }`,
     params: {
-      name: name?.toLowerCase(),
+      name: name?.toLowerCase() || '',
     },
   };
   const [rows] = await database.run(query);

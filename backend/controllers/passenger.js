@@ -5,17 +5,18 @@ const {
 } = require('../validations/passenger');
 const Passenger = require('../models/passenger');
 
-module.exports.getAll = (req, res) => {
+module.exports.getAll = async (req, res) => {
   const { name } = req.query;
   try {
     const passengers = await Passenger.getPassengers(name);
     res.json(passengers);
   } catch (err) {
+    console.log('Error getting users', err);
     res.status(500).json({ error: err.message });
   }
 };
 
-module.exports.getOne = (req, res) => {
+module.exports.getOne = async (req, res) => {
   const { id } = req.params;
   if (!id) {
     return res.status(400).json({ error: 'Missing id' });
@@ -27,31 +28,33 @@ module.exports.getOne = (req, res) => {
     }
     res.json(passenger);
   } catch (err) {
+    console.log('Error getting user', err);
     res.status(500).json({ error: err.message });
   }
 };
 
-module.exports.create = (req, res) => {
+module.exports.create = async (req, res) => {
   const { body } = req;
   inspector.sanitize(passengerSanitizationSchema, body);
   const result = inspector.validate(passengerValidationSchema, body);
   if (!result.valid) {
     return res.status(400).json({ error: result.format() });
   }
-  const { passName, passEmail, passDob } = body;
+  const { passengerName, passengerEmail, passengerDob } = body;
   try {
     const idPassenger = await Passenger.createPassenger({
-      passName,
-      passEmail,
-      passDob,
+      name: passengerName,
+      email: passengerEmail,
+      dob: passengerDob,
     });
     res.status(201).json({ id: idPassenger });
   } catch (err) {
+    console.log('Error creating user', err);
     res.status(500).json({ error: err.message });
   }
 };
 
-module.exports.update = (req, res) => {
+module.exports.update = async (req, res) => {
   const { id } = req.params;
   if (!id) {
     return res.status(400).json({ error: 'Missing id' });
@@ -62,16 +65,22 @@ module.exports.update = (req, res) => {
   if (!result.valid) {
     return res.status(400).json({ error: result.format() });
   }
-  const { passName, passEmail, passDob } = body;
+  const { passengerName, passengerEmail, passengerDob } = body;
   try {
-    await Passenger.updatePassenger({ id, passName, passEmail, passDob });
+    await Passenger.updatePassenger({
+      id,
+      name: passengerName,
+      email: passengerEmail,
+      dob: passengerDob,
+    });
     res.status(204).send();
   } catch (err) {
+    console.log('Error updating user', err);
     res.status(500).json({ error: err.message });
   }
 };
 
-module.exports.delete = (req, res) => {
+module.exports.delete = async (req, res) => {
   const { id } = req.params;
   if (!id) {
     return res.status(400).json({ error: 'Missing id' });
@@ -80,6 +89,7 @@ module.exports.delete = (req, res) => {
     await Passenger.deletePassenger(id);
     res.status(204).send();
   } catch (err) {
+    console.log('Error deleting user', err);
     res.status(500).json({ error: err.message });
   }
 };

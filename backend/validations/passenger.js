@@ -1,15 +1,15 @@
 module.exports.passengerSanitizationSchema = {
   type: 'object',
   properties: {
-    passName: {
+    passengerName: {
       type: 'string',
       rules: ['trim', 'title'],
     },
-    passEmail: {
+    passengerEmail: {
       type: 'string',
       rules: ['trim', 'lower'],
     },
-    passDob: {
+    passengerDob: {
       type: 'date',
     },
   },
@@ -18,18 +18,18 @@ module.exports.passengerSanitizationSchema = {
 module.exports.passengerValidationSchema = {
   type: 'object',
   properties: {
-    passName: {
+    passengerName: {
       type: 'string',
       minLength: 3,
       maxLength: 20,
     },
-    passEmail: {
+    passengerEmail: {
       type: 'string',
       minLength: 3,
       maxLength: 20,
       pattern: 'email',
     },
-    passDob: {
+    passengerDob: {
       type: 'date',
     },
   },
