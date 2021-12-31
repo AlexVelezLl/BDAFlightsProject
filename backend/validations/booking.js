@@ -7,6 +7,12 @@ module.exports.bookingSanitizationSchema = {
     bookDate: {
       type: 'date',
     },
+    passengers: {
+      type: 'array',
+      items: {
+        type: 'integer',
+      },
+    }
   },
 };
 
@@ -19,6 +25,13 @@ module.exports.bookingValidationSchema = {
     },
     bookDate: {
       type: 'date',
+    },
+    passengers: {
+      type: 'array',
+      items: {
+        type: 'integer',
+        gt: 0,
+      },
     },
   },
 };

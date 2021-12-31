@@ -5,6 +5,7 @@ const {
 } = require('../validations/booking');
 
 module.exports.getAll = (req, res) => {
+  // 127
   res.json([{}]);
 };
 

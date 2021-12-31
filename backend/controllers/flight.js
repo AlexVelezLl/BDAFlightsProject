@@ -5,6 +5,7 @@ const {
 } = require('../validations/flight');
 
 module.exports.getAll = (req, res) => {
+  const { name } = req.query;
   res.json([{}]);
 };
 
