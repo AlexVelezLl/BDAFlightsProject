@@ -2,17 +2,17 @@ module.exports.bookingSanitizationSchema = {
   type: 'object',
   properties: {
     flightId: {
-      type: 'integer',
+      type: 'string',
     },
     bookDate: {
       type: 'date',
     },
-    passengers: {
+    passengerIDs: {
       type: 'array',
       items: {
-        type: 'integer',
+        type: 'string',
       },
-    }
+    },
   },
 };
 
@@ -20,17 +20,19 @@ module.exports.bookingValidationSchema = {
   type: 'object',
   properties: {
     flightId: {
-      type: 'integer',
-      gt: 0,
+      type: 'string',
+      minLength: 36,
+      maxLength: 36,
     },
     bookDate: {
       type: 'date',
     },
-    passengers: {
+    passengerIDs: {
       type: 'array',
       items: {
-        type: 'integer',
-        gt: 0,
+        type: 'string',
+        minLength: 36,
+        maxLength: 36,
       },
     },
   },
