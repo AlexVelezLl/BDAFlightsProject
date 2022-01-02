@@ -1,0 +1,26 @@
+[
+  {
+    "name": "booking",
+    "path": "/booking",
+    "component": "C:\\\\Users\\\\pauva\\\\OneDrive\\\\Documentos\\\\ESPOL\\\\OCTAVO\\\\8. Base de datos avanzado\\\\Proyecto\\\\SEGUNDO PARCIAL\\\\BDAFlightsProject\\\\frontend\\\\pages\\\\booking.vue",
+    "chunkName": "pages/booking"
+  },
+  {
+    "name": "flight",
+    "path": "/flight",
+    "component": "C:\\\\Users\\\\pauva\\\\OneDrive\\\\Documentos\\\\ESPOL\\\\OCTAVO\\\\8. Base de datos avanzado\\\\Proyecto\\\\SEGUNDO PARCIAL\\\\BDAFlightsProject\\\\frontend\\\\pages\\\\flight.vue",
+    "chunkName": "pages/flight"
+  },
+  {
+    "name": "passengers",
+    "path": "/passengers",
+    "component": "C:\\\\Users\\\\pauva\\\\OneDrive\\\\Documentos\\\\ESPOL\\\\OCTAVO\\\\8. Base de datos avanzado\\\\Proyecto\\\\SEGUNDO PARCIAL\\\\BDAFlightsProject\\\\frontend\\\\pages\\\\passengers.vue",
+    "chunkName": "pages/passengers"
+  },
+  {
+    "name": "index",
+    "path": "/",
+    "component": "C:\\\\Users\\\\pauva\\\\OneDrive\\\\Documentos\\\\ESPOL\\\\OCTAVO\\\\8. Base de datos avanzado\\\\Proyecto\\\\SEGUNDO PARCIAL\\\\BDAFlightsProject\\\\frontend\\\\pages\\\\index.vue",
+    "chunkName": "pages/index"
+  }
+]
