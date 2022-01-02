@@ -27,6 +27,7 @@ module.exports.bookingValidationSchema = {
     },
     bookingDate: {
       type: 'date',
+      optional: true,
     },
     passengerIDs: {
       type: 'array',
