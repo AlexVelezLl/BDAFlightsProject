@@ -64,9 +64,9 @@ module.exports.update = async (req, res) => {
   if (!result.valid) {
     return res.status(400).json({ error: result.format() });
   }
-  const { bookingDate, passengerIDs } = body;
+  const { passengerIDs } = body;
   try {
-    await Booking.updateBooking({ id, bookingDate, passengerIDs });
+    await Booking.updateBooking({ id, passengerIDs });
     res.status(204).send();
   } catch (err) {
     console.log('Error updating booking: ', err);

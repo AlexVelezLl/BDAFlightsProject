@@ -74,21 +74,11 @@ module.exports.createBooking = ({ flightID, bookingDate, passengerIDs }) => {
   });
 };
 
-module.exports.updateBooking = ({ id, bookingDate, passengerIDs }) => {
+module.exports.updateBooking = ({ id, passengerIDs }) => {
   return new Promise((resolve, reject) => {
     database.runTransaction(async (err, transaction) => {
       if (err) reject(err);
       try {
-        await transaction.runUpdate({
-          sql: `
-            UPDATE 
-              Booking
-            SET
-              bookingDate = @bookingDate
-            WHERE
-              bookingID = @id`,
-          params: { bookingDate, id },
-        });
         await transaction.runUpdate({
           sql: `
             DELETE FROM
