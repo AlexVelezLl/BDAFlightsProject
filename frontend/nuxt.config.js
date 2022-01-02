@@ -54,7 +54,7 @@ export default {
   ],
 
   axios: {
-    browserBaseURL: ''
+    baseURL: process.env.API
   },
 
   i18n: {}

@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt",
+    "serve": "nuxt",
     "generate": "nuxt generate",
     "start": "nuxt start"
   },
   "dependencies": {
     "@nuxt/http": "^0.6.0",
     "@nuxtjs/axios": "^5.12.5",
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "nuxt": "^2.14.6",
     "nuxt-i18n": "^6.15.4",

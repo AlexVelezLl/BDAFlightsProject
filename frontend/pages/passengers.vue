@@ -31,9 +31,9 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in passengersL" :key="item.name">
-                  <td class="text-center">{{ item.name }}</td>
-                  <td class="text-center">{{ item.date }}</td>
+                <tr v-for="item in passengers" :key="item.name">
+                  <td class="text-center">{{ item.passengerName }}</td>
+                  <td class="text-center">{{ item.passengerDOB }}</td>
                   <td class="text-center">
                     <div>
                       <v-btn
@@ -112,27 +112,22 @@
         items: [
           'web', 'shopping', 'videos', 'images', 'news',
         ],
-        passengersL: [
-          {
-            name: 'Valeria',
-            date: '01/01/2020',
-          },
-          {
-            name: 'Alex',
-            date: '01/01/2020',
-          },
-          {
-            name: 'Elsa',
-            date: '01/01/2020',
-          },
-          {
-            name: 'Anna',
-            date: '01/01/2020',
-          }
-        ],
+        passengers:[],
       }
     },
+    created () {
+      this.getPassengers();
+
+    },
     methods: {
+      async getPassengers () {
+        try {
+          const response = await this.$axios.get('passenger')
+          this.passengers = response.data
+        } catch (error) {
+          console.log(error)
+        }
+      },
 
     },
     computed: {
