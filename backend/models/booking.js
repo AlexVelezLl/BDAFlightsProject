@@ -1,6 +1,6 @@
 const uuid = require('uuid');
 const { Spanner } = require('@google-cloud/spanner');
-const { instanceId, databaseId } = require('../db/bd.config');
+const { projectId, instanceId, databaseId } = require('../db/bd.config');
 
 const spanner = new Spanner({ projectId });
 
@@ -35,7 +35,7 @@ module.exports.getBookingById = async (id) => {
   return rows[0]?.toJSON();
 };
 
-module.exports.createBooking = ({ flightID, bookDate, passengerIDs }) => {
+module.exports.createBooking = ({ flightID, bookingDate, passengerIDs }) => {
   const id = uuid.v4();
   return new Promise((resolve, reject) => {
     database.runTransaction(async (err, transaction) => {
@@ -44,25 +44,25 @@ module.exports.createBooking = ({ flightID, bookDate, passengerIDs }) => {
         await transaction.runUpdate({
           sql: `
             INSERT
-              Booking(bookingID, flightID, bookDate)
+              Booking(bookingID, flightID, bookingDate)
             VALUES
-              (@id, @flightID, @passengerID, @seatNumber)`,
-          params: { id, flightID, bookDate },
+              (@id, @flightID, @bookingDate)`,
+          params: { id, flightID, bookingDate },
         });
         const passengerIDsObject = getPassengerIDsObject(passengerIDs);
         await transaction.runUpdate({
           sql:
             `
             INSERT
-              BookingPassenger(bookingID, passengerID)
+              BookingDetails(flightID, bookingID, passengerID)
             VALUES` +
             passengerIDs
               .map(
                 (_, idx) => `
-              (@id, @passengerID${idx})`
+              (@flightID, @id, @passengerID${idx})`
               )
               .join(','),
-          params: { id, ...passengerIDsObject },
+          params: { id, flightID, ...passengerIDsObject },
         });
         await transaction.commit();
         resolve(id);
@@ -74,7 +74,7 @@ module.exports.createBooking = ({ flightID, bookDate, passengerIDs }) => {
   });
 };
 
-module.exports.updateBooking = ({ id, flightID, bookDate, passengerIDs }) => {
+module.exports.updateBooking = ({ id, bookingDate, passengerIDs }) => {
   return new Promise((resolve, reject) => {
     database.runTransaction(async (err, transaction) => {
       if (err) reject(err);
@@ -84,26 +84,44 @@ module.exports.updateBooking = ({ id, flightID, bookDate, passengerIDs }) => {
             UPDATE 
               Booking
             SET
-              flightID = @flightID,
-              bookDate = @bookDate
+              bookingDate = @bookingDate
             WHERE
               bookingID = @id`,
-          params: { flightID, bookDate, id },
+          params: { bookingDate, id },
         });
+        await transaction.runUpdate({
+          sql: `
+            DELETE FROM
+              BookingDetails
+            WHERE
+              bookingID = @id`,
+          params: { id },
+        });
+        const [rows] = await transaction.run({
+          sql: `
+            SELECT 
+              flightID
+            FROM
+              Booking
+            WHERE
+              bookingID = @id`,
+          params: { id },
+        });
+        const { flightID } = rows[0].toJSON();
         const passengerIDsObject = getPassengerIDsObject(passengerIDs);
         await transaction.runUpdate({
           sql:
             `
             INSERT
-              BookingPassenger(bookingID, passengerID)
+              BookingDetails(flightID, bookingID, passengerID)
             VALUES` +
             passengerIDs
               .map(
                 (_, idx) => `
-              (@id, @passengerID${idx})`
+              (@flightID, @id, @passengerID${idx})`
               )
               .join(','),
-          params: { id, ...passengerIDsObject },
+          params: { flightID, id, ...passengerIDsObject },
         });
         await transaction.commit();
         resolve();

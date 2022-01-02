@@ -1,5 +1,7 @@
+require('dotenv').config();
+
 const { Spanner } = require('@google-cloud/spanner');
-const { instanceId, databaseId } = require('./bd.config');
+const { projectId, instanceId, databaseId } = require('./bd.config');
 
 const spanner = new Spanner({ projectId });
 
@@ -11,6 +13,7 @@ const schema = [
         flightID    STRING(36)  NOT NULL,
         flightSource   STRING(20)  NOT NULL,
         flightDest    STRING(20)  NOT NULL,
+        flightDate    TIMESTAMP  NOT NULL,
         flightSeat  INT64  NOT NULL,
         ticketCost FLOAT64  NOT NULL
       ) PRIMARY KEY (flightID)`,
@@ -18,7 +21,7 @@ const schema = [
   `CREATE TABLE Booking (
         flightID    STRING(36) NOT NULL,
         bookingID    STRING(36) NOT NULL,
-        bookDate    DATE
+        bookingDate    TIMESTAMP NOT NULL
       ) PRIMARY KEY (flightID, bookingID),
       INTERLEAVE IN PARENT Flight ON DELETE CASCADE`,
 
@@ -33,7 +36,7 @@ const schema = [
         passengerID    STRING(36) NOT NULL,
         passengerName    STRING(20) NOT NULL,
         passengerEmail    STRING(20) NOT NULL,
-        passengerDOB    DATE NOT NULL
+        passengerDOB    TIMESTAMP NOT NULL
         ) PRIMARY KEY (passengerID)`,
 ];
 

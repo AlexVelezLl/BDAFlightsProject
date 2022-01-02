@@ -1,10 +1,10 @@
 module.exports.bookingSanitizationSchema = {
   type: 'object',
   properties: {
-    flightId: {
+    flightID: {
       type: 'string',
     },
-    bookDate: {
+    bookingDate: {
       type: 'date',
     },
     passengerIDs: {
@@ -19,12 +19,13 @@ module.exports.bookingSanitizationSchema = {
 module.exports.bookingValidationSchema = {
   type: 'object',
   properties: {
-    flightId: {
+    flightID: {
       type: 'string',
       minLength: 36,
       maxLength: 36,
+      optional: true,
     },
-    bookDate: {
+    bookingDate: {
       type: 'date',
     },
     passengerIDs: {
@@ -34,6 +35,7 @@ module.exports.bookingValidationSchema = {
         minLength: 36,
         maxLength: 36,
       },
+      minLength: 1,
     },
   },
 };
