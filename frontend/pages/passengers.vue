@@ -15,7 +15,7 @@
               absolute
               right
               color="#fad83a"
-              @click="dialog2 = true"
+              @click="infomodal = true; onEdit = false;clearPassenger()"
             >
               <v-icon> mdi-account-plus </v-icon>
             </v-btn>
@@ -38,7 +38,7 @@
                 <tr v-for="item in passengers" :key="item.name">
                   <td class="text-center">{{ item.passengerName }}</td>
                   <td class="text-center">{{ item.passengerEmail }}</td>
-                  <td class="text-center">{{ item.passengerDOB }}</td>
+                  <td class="text-center">{{ item.passengerDob }}</td>
                   <td class="text-center">
                     <div>
                       <v-btn
@@ -46,7 +46,11 @@
                         dark
                         x-small
                         fab
-                        @click="dialog2 = true"
+                        @click="
+                          infomodal = true;
+                          actualPassenger = item;
+                          onEdit = true;
+                        "
                       >
                         <v-icon> mdi-pencil </v-icon>
                       </v-btn>
@@ -56,7 +60,10 @@
                         dark
                         x-small
                         fab
-                        @click="dialog3 = true; passengerToDelete = item.passengerID" 
+                        @click="
+                          deletemodal = true;
+                          passengerToDelete = item.passengerID;
+                        "
                       >
                         <v-icon> mdi-delete </v-icon>
                       </v-btn>
@@ -70,33 +77,33 @@
       </v-col>
     </section>
 
-    <v-dialog v-model="dialog2" width="50%">
+    <v-dialog v-model="infomodal" width="50%" persistent>
       <v-card>
         <v-card-title class="white--text" style="background:#282c2c">
-          Agregar pasajero
+          {{ this.onEdit ? "Editar pasajero" : "Agregar pasajero" }}
         </v-card-title>
         <v-progress-linear
-          :active="loading"
-          :indeterminate="loading"
+          :active="loadingPassengerAction"
+          :indeterminate="loadingPassengerAction"
         ></v-progress-linear>
         <v-col>
           <v-form>
             <v-card-text>
               <v-text-field
-                v-model="newPassenger.passengerName"
+                v-model="actualPassenger.passengerName"
                 label="Name"
                 required
                 outlined
               ></v-text-field>
               <v-text-field
-                v-model="newPassenger.passengerEmail"
+                v-model="actualPassenger.passengerEmail"
                 label="Correo"
                 required
                 outlined
                 type="email"
               ></v-text-field>
               <v-text-field
-                v-model="newPassenger.passengerDob"
+                v-model="actualPassenger.passengerDob"
                 label="Fecha de nacimiento"
                 required
                 outlined
@@ -105,19 +112,29 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer />
-              <v-btn color="grey darken-1" text @click="dialog2 = false">
+              <v-btn
+                color="grey darken-1"
+                text
+                @click="
+                  infomodal = false;
+                  onEdit = false;
+                "
+              >
                 Cancelar
               </v-btn>
-              <v-btn color="#648cac" text @click="addPassenger()">
-                Guardar
+              <v-btn
+                color="#648cac"
+                text
+                @click="onEdit ? editPassenger() : addPassenger()"
+              >
+                {{ this.onEdit ? "Editar" : "Agregar" }}
               </v-btn>
             </v-card-actions>
           </v-form>
         </v-col>
       </v-card>
     </v-dialog>
-    <!--dialog to confirm delete passenger-->
-    <v-dialog v-model="dialog3" width="50%">
+    <v-dialog v-model="deletemodal" width="50%">
       <v-card>
         <v-card-title class="white--text" style="background:#282c2c">
           Eliminar pasajero
@@ -128,11 +145,11 @@
         ></v-progress-linear>
         <v-col>
           <v-card-text>
-            Estas seguro que deseas eliminar el pasajero?
+            ¿Estás seguro que deseas eliminar el pasajero?
           </v-card-text>
           <v-card-actions>
             <v-spacer />
-            <v-btn color="grey darken-1" text @click="dialog3 = false">
+            <v-btn color="grey darken-1" text @click="deletemodal = false">
               Cancelar
             </v-btn>
             <v-btn color="#648cac" text @click="deletePassenger()">
@@ -156,19 +173,19 @@
     },
     data () {
       return {
-        dialog2: false,
-        dialog3: false,
-        tab: null,
-        dialog2: false,
+        infomodal: false,
+        deletemodal: false,
         loading: false,
         loadingDelete: false,
-        newPassenger: {
+        loadingPassengerAction: false,
+        actualPassenger: {
           passengerName: '',
           passengerEmail: '',
           passengerDob: ''
         },
         passengerToDelete: '',
         passengers:[],
+        onEdit: false
       }
     },
     created () {
@@ -185,7 +202,7 @@
               passengerID: item.passengerID,
               passengerName: item.passengerName,
               passengerEmail: item.passengerEmail,
-              passengerDOB: item.passengerDOB.split('T')[0],
+              passengerDob: item.passengerDOB.split('T')[0],
             }
           })
           this.loading = false;
@@ -197,16 +214,12 @@
       async addPassenger () {
         this.loading = true
         try {
-          const response = await this.$axios.post('passenger', this.newPassenger);
-          this.newPassenger = {
-            passengerID: '',
-            passengerName: '',
-            passengerEmail: '',
-            passengerDob: ''
-          };
+          const response = await this.$axios.post('passenger', this.actualPassenger);
+          
           await this.getPassengers();
           this.loading = false;
-          this.dialog2 = false;
+          this.infomodal = false;
+          this.clearPassenger();
 
 
         } catch (error) {
@@ -220,13 +233,34 @@
           const response = await this.$axios.delete(`passenger/${this.passengerToDelete}`);
           await this.getPassengers();
           this.loadingDelete = false;
-          this.dialog3 = false;
+          this.deletemodal = false;
         } catch (error) {
           console.log(error)
         }
       },
 
- 
+      async editPassenger () {
+        this.loadingPassengerAction = true
+        try {
+          const response = await this.$axios.put(`passenger/${this.actualPassenger.passengerID}`, this.actualPassenger);
+          await this.getPassengers();
+          this.loadingPassengerAction = false;
+          this.infomodal = false;
+        } catch (error) {
+          console.log(error)
+        }
+      },
+
+      clearPassenger () {
+        this.actualPassenger = {
+          passengerID: '',
+          passengerName: '',
+          passengerEmail: '',
+          passengerDob: ''
+        };
+      }
+
+
 
     },
     computed: {
@@ -234,8 +268,3 @@
     }
 }
 </script>
-
-<style scoped lang="scss">
-.passengers {
-}
-</style>
