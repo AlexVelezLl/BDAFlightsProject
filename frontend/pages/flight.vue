@@ -2,7 +2,7 @@
   <v-app dark>
     <section class="flight">
       <v-dialog v-model="flightInfoModal" width="40%">
-        <v-card outlined>
+        <v-card>
           <v-card-title class="white--text " style="background:#282c2c">
             {{ editFlight ? "Editar vuelo" : "Agregar vuelo" }}
           </v-card-title>
@@ -147,7 +147,17 @@
                       >
                         <v-icon> mdi-pencil </v-icon>
                       </v-btn>
-                      <v-btn color="#Dc6c7b" class="ml-2" dark x-small fab>
+                      <v-btn
+                        color="#Dc6c7b"
+                        class="ml-2"
+                        dark
+                        x-small
+                        fab
+                        @click="
+                          deleteFlightModal = true;
+                          FlightToDelete = item.flightID;
+                        "
+                      >
                         <v-icon> mdi-delete </v-icon>
                       </v-btn>
                     </div>
@@ -159,6 +169,37 @@
         </v-card>
       </v-col>
     </section>
+
+    <v-dialog v-model="deleteFlightModal" width="50%">
+      <v-card>
+        <v-card-title class="white--text " style="background:#282c2c">
+          Eliminar vuelo
+        </v-card-title>
+        <v-progress-linear
+          :active="loadingDeleteFlight"
+          :indeterminate="loadingDeleteFlight"
+        ></v-progress-linear>
+        <v-col>
+          <v-card-text >
+            ¿Estás seguro que deseas eliminar el vuelo?
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="deleteFlightModal = false"
+            >
+              Cancelar
+            </v-btn>
+            <v-btn color="#648cac" text @click="deleteFlight()">
+              Eliminar
+            </v-btn>
+          </v-card-actions>
+        </v-col>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -175,8 +216,11 @@
       return {
         loading: false,
         loadingFlightAction: false,
+        loadingDeleteFlight: false,
         flightInfoModal: false,
+        deleteFlightModal: false,
         FlightToEdit: null,
+        FlightToDelete: null,
         editFlight: false,
         flights: [],
         actualFlight: {
@@ -251,6 +295,20 @@
           this.getFlights();
           this.loadingFlightAction = false;
           this.flightInfoModal = false;
+          console.log(this.flights);
+
+        } catch (error) {
+          this.loading = false;
+          console.log(error);
+        }
+      },
+      async deleteFlight(){
+        try {
+          this.loadingDeleteFlight = true;
+          const response = await this.$axios.delete('flight/' + this.FlightToDelete);
+          this.getFlights();
+          this.loadingDeleteFlight = false;
+          this.deleteFlightModal = false;
           console.log(this.flights);
 
         } catch (error) {

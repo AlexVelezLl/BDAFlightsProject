@@ -3,24 +3,28 @@
     "name": "booking",
     "path": "/booking",
     "component": "C:\\\\Users\\\\pauva\\\\OneDrive\\\\Documentos\\\\ESPOL\\\\OCTAVO\\\\8. Base de datos avanzado\\\\Proyecto\\\\SEGUNDO PARCIAL\\\\BDAFlightsProject\\\\frontend\\\\pages\\\\booking.vue",
-    "chunkName": "pages/booking"
+    "chunkName": "pages/booking",
+    "_name": "_f7ce9bc2"
   },
   {
     "name": "flight",
     "path": "/flight",
     "component": "C:\\\\Users\\\\pauva\\\\OneDrive\\\\Documentos\\\\ESPOL\\\\OCTAVO\\\\8. Base de datos avanzado\\\\Proyecto\\\\SEGUNDO PARCIAL\\\\BDAFlightsProject\\\\frontend\\\\pages\\\\flight.vue",
-    "chunkName": "pages/flight"
+    "chunkName": "pages/flight",
+    "_name": "_04e6f4cc"
   },
   {
     "name": "passengers",
     "path": "/passengers",
     "component": "C:\\\\Users\\\\pauva\\\\OneDrive\\\\Documentos\\\\ESPOL\\\\OCTAVO\\\\8. Base de datos avanzado\\\\Proyecto\\\\SEGUNDO PARCIAL\\\\BDAFlightsProject\\\\frontend\\\\pages\\\\passengers.vue",
-    "chunkName": "pages/passengers"
+    "chunkName": "pages/passengers",
+    "_name": "_5fe5aa7a"
   },
   {
     "name": "index",
     "path": "/",
     "component": "C:\\\\Users\\\\pauva\\\\OneDrive\\\\Documentos\\\\ESPOL\\\\OCTAVO\\\\8. Base de datos avanzado\\\\Proyecto\\\\SEGUNDO PARCIAL\\\\BDAFlightsProject\\\\frontend\\\\pages\\\\index.vue",
-    "chunkName": "pages/index"
+    "chunkName": "pages/index",
+    "_name": "_604d0198"
   }
 ]
