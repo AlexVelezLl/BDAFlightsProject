@@ -7,13 +7,41 @@ const spanner = new Spanner({ projectId });
 const instance = spanner.instance(instanceId);
 const database = instance.database(databaseId);
 
-module.exports.getBookings = async () => {
+module.exports.getBookings = async ({ limit, page }) => {
   const query = {
     sql: `
-      SELECT * 
-      FROM 
-        Booking
-      `,
+      SELECT
+        b.bookingID,
+        b.bookingDate,
+        f.flightID,
+        f.flightSource,
+        f.flightDest,
+        f.flightDate,
+        bd.nPassengers
+      FROM
+        Booking b
+      INNER JOIN
+        Flight f ON b.flightID = f.flightID
+      INNER JOIN
+        (
+          SELECT
+            bookingID,
+            COUNT(passengerID) AS nPassengers
+          FROM
+            BookingDetails
+          GROUP BY
+            bookingID
+        ) bd ON b.bookingID = bd.bookingID
+      ORDER BY
+        b.bookingDate DESC
+      LIMIT
+        @limit
+      OFFSET
+        @offset`,
+    params: {
+      limit,
+      offset: page * limit,
+    },
   };
   const [rows] = await database.run(query);
   return rows.map((row) => row.toJSON());
@@ -22,15 +50,20 @@ module.exports.getBookings = async () => {
 module.exports.getBookingById = async (id) => {
   const query = {
     sql: `
-      SELECT * 
-      FROM 
-        Booking
+      SELECT
+        *
+      FROM
+        Booking b
+      INNER JOIN
+        BookingDetails bd ON b.bookingID = bd.bookingID
+      INNER JOIN
+        Passenger p ON bd.passengerID = p.passengerID
       WHERE
-        bookingID = @id`,
+        b.bookingID = @id`,
     params: {
       id,
     },
-  };
+  }
   const [rows] = await database.run(query);
   return rows[0]?.toJSON();
 };

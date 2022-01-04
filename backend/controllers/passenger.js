@@ -3,12 +3,22 @@ const {
   passengerSanitizationSchema,
   passengerValidationSchema,
 } = require('../validations/passenger');
+const {
+  paginationSanitizationSchema,
+  paginationValidationSchema,
+} = require('../validations/queryPagination');
 const Passenger = require('../models/passenger');
 
 module.exports.getAll = async (req, res) => {
-  const { name } = req.query;
+  const { query } = req;
+  inspector.sanitize(paginationSanitizationSchema, query);
+  const result = inspector.validate(paginationValidationSchema, query);
+  if (!result.valid) {
+    return res.status(400).json({ error: result.format() });
+  }
+  const { name, page, limit } = query;
   try {
-    const passengers = await Passenger.getPassengers(name);
+    const passengers = await Passenger.getPassengers({ name, page, limit });
     res.json(passengers);
   } catch (err) {
     console.log('Error getting users', err);
