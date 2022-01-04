@@ -175,7 +175,7 @@
                       v-for="(item, i) in actualBooking.passengerIDs"
                       :key="i"
                     >
-                      <td class="text-center">{{ item.name }}</td>
+                      <td class="text-center">{{ item.passengerName }}</td>
                       <td class="text-center">
                         <div>
                           <v-btn
@@ -222,24 +222,35 @@
         <v-col>
           <v-form>
             <v-card-text>
-              <v-text-field
+              <v-autocomplete
                 v-model="nameSearch"
-                label="Cedula"
-                required
+                :loading="loading"
+                :items="passengersResult"
+                :search-input.sync="search"
+
+                itemn-value="passegnerID"
+                item-text="passengerName"
+                cache-items
                 outlined
-                :append-icon="'mdi-magnify'"
-                @input="searchPassenger(nameSearch)"
-                @click:append="searchPassenger(nameSearch)"
+                
+              
+              
+                hide-no-data
+                hide-details
+                label="Nombre"
+                class="mb-2"
+                return-object
+                
               >
-              </v-text-field>
+              </v-autocomplete>
               <v-row class="justify-center ml-3">
                 <v-col cols="6">
                   <strong>Nombre</strong> <br />
-                  {{ actualPassenger ? actualPassenger.name : "-" }}
+                  {{ nameSearch ? nameSearch.passengerName : "-" }}
                 </v-col>
                 <v-col cols="6">
                   <strong> Nacimiento </strong> <br />
-                  {{ actualPassenger ? actualPassenger.birthdate : "-" }}
+                  {{ nameSearch ? nameSearch.passengerDOB.split('T')[0] : "-" }}
                 </v-col>
               </v-row>
             </v-card-text>
@@ -302,8 +313,23 @@
     mounted () {
 
     },
+    computed:{
+      items(){
+        return this.passengersResult;
+      },
+    },
+    watch:{
+      async search(val){
+        await this.searchPassenger(val);
+        console.log(this.passengersResult);
+      }
+    },
     data () {
       return {
+        search : null,
+        num : 0,
+        passengerResult : '',
+        passengersResult: [],
         nameSearch: '',
         onEdit: false,
         loading: false,
@@ -313,8 +339,8 @@
         BookingToDelete: '',
         actualPassenger: {
           id: '654686',
-          name : 'Fernando a',
-          birthdate: '2021-05-05'
+          name : '',
+          birthdate: ''
         },
         actualBooking : {
           bookingID: '',
@@ -347,22 +373,22 @@
           },
           {
             id: '654686',
-            name : 'Alicia Keys',
+            name : 'Alicia',
             birthdate: '2021-05-05'
           },
           {
             id: '654686',
-            name : 'Nicolas Ferreira',
+            name : 'Nicolas',
             birthdate: '2021-05-05'
           },
           {
             id: '654686',
-            name : 'Amelia Barros',
+            name : 'Amelia',
             birthdate: '2021-05-05'
           },
           {
             id: '654686',
-            name : 'Lucia Alvarado',
+            name : 'Lucia',
             birthdate: '2021-05-05'
           },
           {
@@ -387,25 +413,33 @@
       }
     },
     created () {
-      this.getBookings()
+      this.getBookings();
 
 
 
     },
     methods: {
 
-      searchPassenger(name){
-        this.loadingAction = true
+      printActual(){
+        console.log(this.nameSearch);
 
-        this.actualPassenger = this.passengerIDs.find(item => item.name.toLowerCase() == name)
-        console.log(this.actualPassenger);
+      },
+      async searchPassenger(name){
+         this.loadingAction = true
+        let response = await this.$axios.get('passenger', {
+          params: {
+            name: name
+          }
+        });
+        this.passengersResult = response.data
         this.loadingAction = false
+        
       },
 
-      addPassenger(id){
+      addPassenger(){
         console.log("Agregando pasajero");
-        console.log(this.actualBooking);
-        this.actualBooking.passengerIDs.push(this.actualPassenger)
+        console.log(this.nameSearch);
+        this.actualBooking.passengerIDs.push(this.nameSearch);
         this.addPassennger = false
       },
       searchBooking(id){
@@ -544,9 +578,6 @@
 
 
     },
-    computed: {
-
-    }
 }
 </script>
 
