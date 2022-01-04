@@ -1,3 +1,4 @@
+require('dotenv').config();
 const fs = require('fs');
 const { Spanner } = require('@google-cloud/spanner');
 
@@ -26,11 +27,12 @@ async function insertPassegners() {
             params: { id, name, email, dob },
           });
           await transaction.commit();
+          console.log('Inserted passenger: ', id);
           resolve();
         } catch (err) {
-          transaction.rollback();
           console.log('Error inserting passenger: ', id, '. Error: ', err);
-          reject(err);
+          transaction.rollback();
+          resolve();
         }
       });
     });
@@ -39,7 +41,6 @@ async function insertPassegners() {
 
 async function insertFlights() {
   const flights = JSON.parse(fs.readFileSync('db/data/flights.json'));
-
   for (let flight of flights) {
     const { id, source, dest, date, seat, cost } = flight;
     await new Promise((resolve, reject) => {
@@ -49,17 +50,18 @@ async function insertFlights() {
           await transaction.runUpdate({
             sql: `
               INSERT
-                Flight(flightID, flightSource, flightDest, flightDate, flightSeat, flightCost)
+                Flight(flightID, flightSource, flightDest, flightDate, flightSeat, ticketCost)
               VALUES
                 (@id, @source, @dest, @date, @seat, @cost)`,
             params: { id, source, dest, date, seat, cost },
           });
           await transaction.commit();
+          console.log('Inserted flight: ', id);
           resolve();
         } catch (err) {
           transaction.rollback();
           console.log('Error inserting flight: ', id, '. Error: ', err);
-          reject(err);
+          resolve();
         }
       });
     });
@@ -99,10 +101,12 @@ async function insertBookings() {
             params: { id, flight, ...passengerIDsObject },
           });
           await transaction.commit();
+          console.log('Inserted booking: ', id);
           resolve();
         } catch (err) {
           console.log('Error inserting booking: ', id, '. Error: ', err);
-          reject(err);
+          transaction.rollback();
+          resolve();
         }
       });
     });
@@ -116,4 +120,6 @@ const getPassengerIDsObject = (passengerIDs) => {
   }, {});
 };
 
-database.close();
+insertBookings().then(() => {
+  database.close()
+});

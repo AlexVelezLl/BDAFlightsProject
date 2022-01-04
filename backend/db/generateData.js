@@ -23,8 +23,8 @@ function generateFlights() {
   const cities = JSON.parse(fs.readFileSync('db/data/cities.json'));
   for (let i = 0; i < 1000; i++) {
     const id = uuid.v4();
-    const source = cities[Math.floor(Math.random() * cities.length)].name;
-    const dest = cities[Math.floor(Math.random() * cities.length)].name;
+    const source = cities[Math.floor(Math.random() * cities.length)].name.slice(0,20);
+    const dest = cities[Math.floor(Math.random() * cities.length)].name.slice(0,20);
     //Make variable arrivalDate between 1 and 30 days from now
     const date = new Date(
       new Date().getTime() +
