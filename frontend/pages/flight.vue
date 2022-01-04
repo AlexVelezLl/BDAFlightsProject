@@ -164,8 +164,19 @@
                   </td>
                 </tr>
               </tbody>
+              
+            
             </template>
+            
           </v-simple-table>
+          <v-pagination
+              v-model="pagination.page"
+              :length="Math.ceil(pagination.totalItems/pagination.rowsPerPage)"
+              total-visible="7"
+              class="mt-3"
+              @input="changePage()"
+              
+            ></v-pagination>
         </v-card>
       </v-col>
     </section>
@@ -214,6 +225,11 @@
     },
     data () {
       return {
+        pagination: {
+          page: 1,
+          rowsPerPage: 7,
+          totalItems: 1000
+        },
         loading: false,
         loadingFlightAction: false,
         loadingDeleteFlight: false,
@@ -238,10 +254,15 @@
       this.getFlights()
     },
     methods: {
-      async getFlights(){
+      async getFlights(limit = 7, page = 1) {
         try {
           this.loading = true;
-          const response = await this.$axios.get('flight');
+          const response = await this.$axios.get('flight', {
+            params: {
+              limit,
+              page
+            }
+          });
           this.flights = response.data.map(item => {
             return {
               flightID: item.flightID,
@@ -326,6 +347,11 @@
           ticketCost: ''
         };
       },
+      async changePage(){
+        console.log("pag", this.pagination.page);
+        await this.getFlights(this.pagination.rowsPerPage , this.pagination.page);
+
+      }
 
 
 

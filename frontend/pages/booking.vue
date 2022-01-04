@@ -88,6 +88,14 @@
               </tbody>
             </template>
           </v-simple-table>
+          <v-pagination
+            v-model="pagination.page"
+            :length="Math.ceil(pagination.totalItems / pagination.rowsPerPage)"
+            :total-visible="7"
+            class="mt-3"
+            @input="changePage()"
+          ></v-pagination
+          >
         </v-card>
       </v-col>
     </section>
@@ -203,10 +211,7 @@
           <v-btn
             color="blue darken-1"
             text
-            @click="
-              
-              onEdit ? updateBooking() : addBooking();
-            "
+            @click="onEdit ? updateBooking() : addBooking()"
           >
             {{ onEdit ? "Editar" : "Agregar" }}
           </v-btn>
@@ -352,6 +357,12 @@ import moment from "moment";
     },
     data () {
       return {
+        pagination : {
+          rowsPerPage: 5,
+          totalItems: 1000,
+          page: 1,
+
+        },
         passengerToDelete: null,
         deletePassengerModal: false,
         search : null,
@@ -465,11 +476,15 @@ import moment from "moment";
         console.log(this.booking);
       },
 
-      async getBookings () {
+      async getBookings (limit = 7, page = 1) {
         try {
           this.loading = true
-          const response = await this.$axios.get('booking')
-
+          const response = await this.$axios.get('booking', {
+            params: {
+              limit: limit,
+              page: page
+            }
+          })
           this.bookings = response.data;
           this.loading = false
         } catch (error) {
@@ -528,7 +543,7 @@ import moment from "moment";
       async addBooking () {
         try {
           this.loadingAction = true
-          
+
           let data = {
             flightID: this.actualBooking.flightID,
             bookingDate: moment().format('YYYY-MM-DD'),
@@ -569,6 +584,10 @@ import moment from "moment";
 
         this.passengersOfBooking.splice(index, 1);
 
+      },
+
+      async changePage() {
+        await this.getBookings(this.pagination.rowsPerPage, this.pagination.page)
       },
 
 

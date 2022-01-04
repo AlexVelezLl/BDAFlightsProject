@@ -73,6 +73,13 @@
               </tbody>
             </template>
           </v-simple-table>
+          <v-pagination
+            v-model="pagination.page"
+            :length="Math.ceil(pagination.totalItems / pagination.rowsPerPage)"
+            :total-visible="7"
+            class="mt-3"
+            @input="changePage()"
+          ></v-pagination>
         </v-card>
       </v-col>
     </section>
@@ -173,6 +180,11 @@
     },
     data () {
       return {
+        pagination: {
+          page: 1,
+          rowsPerPage: 7,
+          totalItems: 1000
+        },
         infomodal: false,
         deletemodal: false,
         loading: false,
@@ -193,10 +205,15 @@
 
     },
     methods: {
-      async getPassengers () {
+      async getPassengers (limit= 7, page= 1) {
         this.loading = true;
         try {
-          const response = await this.$axios.get('passenger')
+          const response = await this.$axios.get('passenger', {
+            params: {
+              limit,
+              page
+            }
+          });
           this.passengers = response.data.map(item => {
             return {
               passengerID: item.passengerID,
@@ -258,7 +275,11 @@
           passengerEmail: '',
           passengerDob: ''
         };
-      }
+      },
+
+      async changePage () {
+        await this.getPassengers(this.pagination.rowsPerPage, this.pagination.page);
+      },
 
 
 
