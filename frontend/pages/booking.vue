@@ -20,6 +20,7 @@
                 onEdit = false;
                 bookingInfoModal = true;
                 clearBooking();
+                passengersOfBooking = [];
               "
             >
               <v-icon> mdi-airplane-plus </v-icon>
@@ -44,13 +45,14 @@
               <tbody>
                 <tr v-for="(item, i) in bookings" :key="i">
                   <td class="text-center">{{ item.flightID }}</td>
-                  <td class="text-center">{{ item.source }}</td>
-                  <td class="text-center">{{ item.destination }}</td>
+                  <td class="text-center">{{ item.flightSource }}</td>
+                  <td class="text-center">{{ item.flightDest }}</td>
                   <td class="text-center">
-                    {{ item.passengerIDs ? item.passengerIDs.length : 0 }}
+                    {{ item.nPassengers ? item.nPassengers : 0 }}
                   </td>
-                  <td class="text-center">{{ item.bookingDate }}</td>
-
+                  <td class="text-center">
+                    {{ item.bookingDate.split("T")[0] }}
+                  </td>
                   <td class="text-center">
                     <v-col>
                       <v-btn
@@ -120,11 +122,11 @@
           <v-row class="mt-2">
             <v-col cols="6" class="pt-0">
               <strong>Origen:</strong> <br />
-              {{ actualBooking.source }}
+              {{ actualBooking.flightSource }}
             </v-col>
             <v-col cols="6" class="pt-0">
               <strong>Destino:</strong> <br />
-              {{ actualBooking.destination }}
+              {{ actualBooking.flightDest }}
             </v-col>
           </v-row>
           <v-row>
@@ -134,11 +136,7 @@
             </v-col>
             <v-col cols="6" class="pt-0">
               <strong>Numero de pasajeros:</strong> <br />
-              {{
-                actualBooking.passengerIDs
-                  ? actualBooking.passengerIDs.length
-                  : 0
-              }}
+              {{ actualBooking.nPassengers ? actualBooking.nPassengers : 0 }}
             </v-col>
           </v-row>
         </v-card-text>
@@ -171,10 +169,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr
-                      v-for="(item, i) in actualBooking.passengerIDs"
-                      :key="i"
-                    >
+                    <tr v-for="(item, i) in passengersOfBooking" :key="i">
                       <td class="text-center">{{ item.passengerName }}</td>
                       <td class="text-center">
                         <div>
@@ -183,7 +178,11 @@
                             dark
                             x-small
                             fab
-                            @click="bookingInfoModal = true"
+                            @click="
+                              bookingInfoModal = true;
+                              deletePassengerModal = true;
+                              passengerToDelete = item.passengerID;
+                            "
                           >
                             <v-icon> mdi-delete </v-icon>
                           </v-btn>
@@ -205,8 +204,8 @@
             color="blue darken-1"
             text
             @click="
-              bookingInfoModal = false;
-              onEdit ? editBooking() : addBooking();
+              
+              onEdit ? updateBooking() : addBooking();
             "
           >
             {{ onEdit ? "Editar" : "Agregar" }}
@@ -227,20 +226,15 @@
                 :loading="loading"
                 :items="passengersResult"
                 :search-input.sync="search"
-
                 itemn-value="passegnerID"
                 item-text="passengerName"
                 cache-items
                 outlined
-                
-              
-              
                 hide-no-data
                 hide-details
                 label="Nombre"
                 class="mb-2"
                 return-object
-                
               >
               </v-autocomplete>
               <v-row class="justify-center ml-3">
@@ -250,7 +244,7 @@
                 </v-col>
                 <v-col cols="6">
                   <strong> Nacimiento </strong> <br />
-                  {{ nameSearch ? nameSearch.passengerDOB.split('T')[0] : "-" }}
+                  {{ nameSearch ? nameSearch.passengerDOB.split("T")[0] : "-" }}
                 </v-col>
               </v-row>
             </v-card-text>
@@ -301,12 +295,44 @@
         </v-col>
       </v-card>
     </v-dialog>
+    <!-- dialog to delete passenger of booking -->
+    <v-dialog v-model="deletePassengerModal" max-width="50%">
+      <v-card>
+        <v-card-title class="headline" style="background:#282c2c">
+          <span class="white--text">Eliminar pasajero</span>
+        </v-card-title>
+        <v-progress-linear
+          :active="loadingAction"
+          :indeterminate="loadingAction"
+        ></v-progress-linear>
+        <v-col class="ma-0">
+          <v-card-text class="pb-0">
+            Esta seguro que desea eliminar el pasajero?
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="deletePassengerModal = false"
+            >
+              Cancelar
+            </v-btn>
+            <v-btn color="red darken-1" text @click="deletePassenger()">
+              Eliminar
+            </v-btn>
+          </v-card-actions>
+        </v-col>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
 <script lang="js">
+import moment from "moment";
 
   export default  {
+
     layout:'sidebar',
     name: 'booking',
     props: [],
@@ -326,6 +352,8 @@
     },
     data () {
       return {
+        passengerToDelete: null,
+        deletePassengerModal: false,
         search : null,
         num : 0,
         passengerResult : '',
@@ -343,26 +371,6 @@
           birthdate: ''
         },
         actualBooking : {
-          bookingID: '',
-          source: '',
-          destination: '',
-          bookingDate: '',
-          flightDate: '',
-          passengerIDs: [
-            {
-              name: 'Fernandoa',
-              birthdate: '2021-05-05'
-            },
-            {
-              name: 'Fernandob',
-              birthdate: '2021-05-05'
-            },
-            {
-              name: 'Ana',
-              birthdate: '2021-05-05'
-            }
-
-          ]
 
         },
         passengerIDs: [
@@ -402,6 +410,7 @@
             birthdate: '2021-05-05'
           }
         ],
+        passengersOfBooking :[],
         bookings : [],
         bookingInfoModal: false,
         addPassennger: false,
@@ -433,13 +442,20 @@
         });
         this.passengersResult = response.data
         this.loadingAction = false
-        
+
+      },
+      async getPassengersOfBooking(id){
+        this.loadingAction = true
+        let response = await this.$axios.get('booking/'+id);
+        console.log('response', response.data);
+        this.passengersOfBooking = response.data.passengers;
+        this.loadingAction = false
       },
 
       addPassenger(){
         console.log("Agregando pasajero");
         console.log(this.nameSearch);
-        this.actualBooking.passengerIDs.push(this.nameSearch);
+        this.passengersOfBooking.push(this.nameSearch);
         this.addPassennger = false
       },
       searchBooking(id){
@@ -453,58 +469,8 @@
         try {
           this.loading = true
           const response = await this.$axios.get('booking')
-          this.bookings = response.data.map(item => {
-            return {
-              bookingID: item.bookingID,
-              flightID: item.flightID,
-              bookingDate: item.bookingDate.split('T')[0],
-              source: 'source prueba',
-              destination: 'destination prueba',
-              flightDate: '2021-05-05',
-              passengerIDs: [{
-                id: '654686',
-                name : 'Fernando a',
-                birthdate: '2021-05-05'
-              },
-              {
-                id: '654685',
-                name : 'Alfredo',
-                birthdate: '2021-05-05'
-              },
-              {
-                id: '32468',
-                name : 'Sebastian',
-                birthdate: '2021-05-05'
-              },
-              {
-                id: '321465',
-                name : 'Andres',
-                birthdate: '2021-05-05'
-              },
-              {
-                id: '212654',
-                name : 'Luis',
-                birthdate: '2021-05-05'
-              },
-              {
-                id: '23165',
-                name : 'Pablo',
-                birthdate: '2021-05-05'
-              },
-              {
-                id: '23186',
-                name : 'Federer',
-                birthdate: '2021-05-05'
-              },
-              {
-                id: '125215',
-                name : 'Andres',
-                birthdate: '2021-05-05'
-              }
-              ]
 
-            }
-          })
+          this.bookings = response.data;
           this.loading = false
         } catch (error) {
           console.log(error)
@@ -512,20 +478,22 @@
         }
       },
 
-      setBooking(booking){
-        this.actualBooking = {...booking}
+      async setBooking(booking){
+        //loading
         console.log(booking);
+        this.loadingAction = true
+        this.actualBooking = {...booking}
+        await this.getPassengersOfBooking(this.actualBooking.bookingID);
+        console.log(this.passengersOfBooking);
+        console.log(booking);
+        this.loadingAction = false
       },
 
       async searchFlight(id){
         try {
           this.loadingAction = true
           const response = await this.$axios.get('flight/'+id)
-          this.actualBooking.flightID = response.data.flightID
-          this.actualBooking.source = response.data.flightSource
-          this.actualBooking.destination = response.data.flightDest
-          this.actualBooking.flightDate = response.data.flightDate.split('T')[0]
-          this.actualBooking.passengerIDs = []
+          this.actualBooking = {...response.data}
           this.loadingAction = false
         } catch (error) {
           console.log(error)
@@ -560,19 +528,47 @@
       async addBooking () {
         try {
           this.loadingAction = true
-          //flightID, bookingDate, passengerIDs
+          
           let data = {
             flightID: this.actualBooking.flightID,
-            bookingDate: this.actualBooking.bookingDate,
-            passengerIDs: [this.actualBooking.passengerIDs.map(item => item.id)]
+            bookingDate: moment().format('YYYY-MM-DD'),
+            passengerIDs: this.passengersOfBooking.map(item => item.passengerID)
           }
-          // const response = await this.$axios.post('booking', this.actualBooking)
-          // this.loadingAction = false
-          // this.getBookings()
+          console.log(data);
+          let r = await this.$axios.post('booking', data)
+          console.log(r.data);
+          this.loadingAction = false
+          this.bookingInfoModal = false;
+          this.getBookings()
         } catch (error) {
           console.log(error)
           this.loading = false
         }
+      },
+
+      async updateBooking () {
+        try {
+          this.loadingAction = true
+          const passengerIDs = this.passengersOfBooking.map(item => item.passengerID)
+          console.log('passengerIDs', passengerIDs);
+          console.log('bookingId', this.actualBooking.bookingID);
+          const response = await this.$axios.put('booking/'+this.actualBooking.bookingID, {passengerIDs})
+          this.loadingAction = false
+          this.getBookings()
+          this.bookingInfoModal = false;
+        } catch (error) {
+          console.log(error)
+          this.loading = false
+        }
+      },
+
+      deletePassenger(){
+        this.deletePassengerModal = false;
+        let item = this.passengersOfBooking.find(item => item.passengerID == this.passengerToDelete);
+        let index = this.passengersOfBooking.indexOf(item);
+
+        this.passengersOfBooking.splice(index, 1);
+
       },
 
 
