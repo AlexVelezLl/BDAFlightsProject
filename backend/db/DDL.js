@@ -43,7 +43,8 @@ const schema = [
 schema.forEach(async (sql) => {
   try {
     database.tabl;
-    await database.updateSchema(sql);
+    const [operation] = await database.updateSchema(sql);
+    await operation.promise();
   } catch (err) {
     console.error(err);
   }

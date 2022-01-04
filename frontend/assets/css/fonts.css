@@ -1,0 +1,17 @@
+/* regular typography */
+h1,h2,h3,h4,h5,h6 {
+    font-family: 'Quicksand';
+}
+
+body {
+    font-family: '';
+}
+
+/* font faces */
+@font-face {
+font-family: 'Quicksand';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/Quicksand/Quicksand-Regular.ttf') format('truetype');
+}
