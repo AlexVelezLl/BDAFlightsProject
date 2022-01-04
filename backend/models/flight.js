@@ -7,13 +7,23 @@ const spanner = new Spanner({ projectId });
 const instance = spanner.instance(instanceId);
 const database = instance.database(databaseId);
 
-module.exports.getFlights = async () => {
+module.exports.getFlights = async ({ page, limit}) => {
   const query = {
     sql: `
-      SELECT * 
-      FROM 
+      SELECT
+        *
+      FROM
         Flight
-      `,
+      ORDER BY
+        flightDate DESC
+      LIMIT
+        @limit
+      OFFSET
+        @offset`,
+    params: {
+      limit,
+      offset: page * limit,
+    },
   };
   const [rows] = await database.run(query);
   return rows.map((row) => row.toJSON());

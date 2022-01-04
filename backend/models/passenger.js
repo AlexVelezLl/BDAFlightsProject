@@ -7,7 +7,7 @@ const spanner = new Spanner({ projectId });
 const instance = spanner.instance(instanceId);
 const database = instance.database(databaseId);
 
-module.exports.getPassengers = async (name) => {
+module.exports.getPassengers = async ({ name, page, limit }) => {
   const query = {
     sql: `
       SELECT * 
@@ -17,12 +17,19 @@ module.exports.getPassengers = async (name) => {
         name
           ? `
           WHERE
-            LOWER(passengerName) LIKE '%' || @name || '%'
-          LIMIT 5`
+            LOWER(passengerName) LIKE '%' || @name || '%'`
           : ''
-      }`,
+      }
+      ORDER BY
+        passengerName
+      LIMIT
+        @limit
+      OFFSET
+        @offset`,
     params: {
       name: name?.toLowerCase() || '',
+      limit,
+      offset: page * limit,
     },
   };
   const [rows] = await database.run(query);

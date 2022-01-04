@@ -3,12 +3,22 @@ const {
   flightSanitizationSchema,
   flightValidationSchema,
 } = require('../validations/flight');
-
+const {
+  paginationSanitizationSchema,
+  paginationValidationSchema,
+} = require('../validations/queryPagination');
 const Flight = require('../models/flight');
 
 module.exports.getAll = async (req, res) => {
   try {
-    const flights = await Flight.getFlights();
+    const { query } = req;
+    inspector.sanitize(paginationSanitizationSchema, query);
+    const result = inspector.validate(paginationValidationSchema, query);
+    if (!result.valid) {
+      return res.status(400).json({ error: result.format() });
+    }
+    const { page, limit } = query;
+    const flights = await Flight.getFlights({ page, limit });
     res.json(flights);
   } catch (err) {
     console.log('Error getting flights: ', err);

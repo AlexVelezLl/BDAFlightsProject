@@ -3,11 +3,22 @@ const {
   bookingSanitizationSchema,
   bookingValidationSchema,
 } = require('../validations/booking');
+const {
+  paginationSanitizationSchema,
+  paginationValidationSchema,
+} = require('../validations/queryPagination');
 const Booking = require('../models/booking');
 
 module.exports.getAll = async (req, res) => {
   try {
-    const bookings = await Booking.getBookings();
+    const { query } = req;
+    inspector.sanitize(paginationSanitizationSchema, query);
+    const result = inspector.validate(paginationValidationSchema, query);
+    if (!result.valid) {
+      return res.status(400).json({ error: result.format() });
+    }
+    const { page, limit } = query;
+    const bookings = await Booking.getBookings({ page, limit });
     res.json(bookings);
   } catch (err) {
     console.log('Error getting bookings: ', err);
