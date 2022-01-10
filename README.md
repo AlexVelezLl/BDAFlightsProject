@@ -28,7 +28,7 @@ Esta estructura requiere que cada tabla secundaria cuente con la clave prrimaria
 
 * **Claves primarias**
 
-Para la optimización de las lecturas y escrituras en la base, se rediseñó el campo de las claves primarias teniendo lo que dice la [documentación de GCS]:(https://cloud.google.com/spanner/docs/schema-design)
+Para la optimización de las lecturas y escrituras en la base, se rediseñó el campo de las claves primarias teniendo lo que dice la [documentación de GCS](https://cloud.google.com/spanner/docs/schema-design): 
 
 > Una de las causas de los hotspots es tener una columna con un valor que aumenta de forma monotónica como la primera parte de la clave, ya que esto da como resultado que todas las inserciones ocurran al final del espacio de clave. Este patrón no es recomendable porque Cloud Spanner divide los datos entre servidores por rangos de clave, lo que significa que todas tus inserciones se dirigirán a un solo servidor que hará todo el trabajo. 
 
