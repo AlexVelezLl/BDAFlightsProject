@@ -1,8 +1,12 @@
 # Proyecto reserva vuelos
 
+![thumbnail](https://github.com/AlexVelezLl/BDAFlightsProject/blob/master/images/Miniatura.png?raw=true)
+
 El proyecto consiste en un sistema de reserva de vuelos que permitirá administrar pasajeros, vuelos, y las reservas de los vuelos de una determinada cantidad de pasajeros.
 
 El proyecto tiene una arquitectura distribuida, y consta de una aplicación API REST de backend desarrollada con Express y una aplicación de frontend desarrollada en Vue.js. Como base de datos se utilizó Google Cloud Spanner (GCS) con 3 nodos de procesamiento con una configuración regional ubicada en us-west.
+
+El video explicando la implementación y el funcionamiento del sistema se encuentra en: https://youtu.be/Fxa0f8cxW4g
 
 ## Rediseño de la Base de Datos Distribuida de GCS
 
