@@ -25,19 +25,20 @@ const schema = [
       ) PRIMARY KEY (flightID, bookingID),
       INTERLEAVE IN PARENT Flight ON DELETE CASCADE`,
 
-  `CREATE TABLE BookingDetails (
-        flightID    STRING(36) NOT NULL,
-        bookingID    STRING(36)  NOT NULL,
-        passengerID    STRING(36) NOT NULL
-        ) PRIMARY KEY (flightID, bookingID, passengerID),
-        INTERLEAVE IN PARENT Booking ON DELETE CASCADE`,
-
   `CREATE TABLE Passenger (
         passengerID    STRING(36) NOT NULL,
         passengerName    STRING(20) NOT NULL,
         passengerEmail    STRING(20) NOT NULL,
         passengerDOB    TIMESTAMP NOT NULL
-        ) PRIMARY KEY (passengerID)`,
+      ) PRIMARY KEY (passengerID)`,
+
+  `CREATE TABLE BookingDetails (
+        flightID    STRING(36) NOT NULL,
+        bookingID    STRING(36)  NOT NULL,
+        passengerID    STRING(36) NOT NULL,
+        CONSTRAINT FK_passengerID FOREIGN KEY (passengerID) REFERENCES Passenger (passengerID) ON DELETE CASCADE
+        ) PRIMARY KEY (flightID, bookingID, passengerID),
+        INTERLEAVE IN PARENT Booking ON DELETE CASCADE`,
 ];
 
 schema.forEach(async (sql) => {
