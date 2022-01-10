@@ -36,7 +36,7 @@ const schema = [
         flightID    STRING(36) NOT NULL,
         bookingID    STRING(36)  NOT NULL,
         passengerID    STRING(36) NOT NULL,
-        CONSTRAINT FK_passengerID FOREIGN KEY (passengerID) REFERENCES Passenger (passengerID) ON DELETE CASCADE
+        CONSTRAINT FK_passengerID FOREIGN KEY (passengerID) REFERENCES Passenger (passengerID)
         ) PRIMARY KEY (flightID, bookingID, passengerID),
         INTERLEAVE IN PARENT Booking ON DELETE CASCADE`,
 ];
