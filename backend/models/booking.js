@@ -1,6 +1,6 @@
-const uuid = require('uuid');
-const { Spanner } = require('@google-cloud/spanner');
-const { projectId, instanceId, databaseId } = require('../db/bd.config');
+const uuid = require("uuid");
+const { Spanner } = require("@google-cloud/spanner");
+const { projectId, instanceId, databaseId } = require("../db/bd.config");
 
 const spanner = new Spanner({ projectId });
 
@@ -51,7 +51,10 @@ module.exports.getBookingById = async (id) => {
   const query = {
     sql: `
       SELECT
-        *
+        b.bookingID,
+        b.bookingDate,
+        p.passengerID,
+        p.passengerName
       FROM
         Booking b
       INNER JOIN
@@ -63,9 +66,21 @@ module.exports.getBookingById = async (id) => {
     params: {
       id,
     },
-  }
+  };
+ 
   const [rows] = await database.run(query);
-  return rows[0]?.toJSON();
+  
+  const result = rows.map((row) => row.toJSON());
+  const passengers = result.map((item) => {
+    const { passengerID, passengerName } = item;
+    return {
+      passengerID,
+      passengerName,
+    };
+  });
+  
+
+  return {bookingID: result[0].bookingID, bookingDate: result[0].bookingDate, passengers};
 };
 
 module.exports.createBooking = ({ flightID, bookingDate, passengerIDs }) => {
@@ -94,7 +109,7 @@ module.exports.createBooking = ({ flightID, bookingDate, passengerIDs }) => {
                 (_, idx) => `
               (@flightID, @id, @passengerID${idx})`
               )
-              .join(','),
+              .join(","),
           params: { id, flightID, ...passengerIDsObject },
         });
         await transaction.commit();
@@ -143,7 +158,7 @@ module.exports.updateBooking = ({ id, passengerIDs }) => {
                 (_, idx) => `
               (@flightID, @id, @passengerID${idx})`
               )
-              .join(','),
+              .join(","),
           params: { flightID, id, ...passengerIDsObject },
         });
         await transaction.commit();

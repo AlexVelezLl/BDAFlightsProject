@@ -2,7 +2,43 @@
 
 El proyecto consiste en un sistema de reserva de vuelos que permitirá administrar pasajeros, vuelos, y las reservas de los vuelos de una determinada cantidad de pasajeros.
 
-El proyecto tiene una arquitectura distribuida, y consta de una aplicación API REST de backend desarrollada con Express y una aplicación de frontend desarrollada en Vue.js. Como base de datos se utilizó Google Cloud Spanner con 3 nodos de procesamiento con una configuración regional ubicada en us-west.
+El proyecto tiene una arquitectura distribuida, y consta de una aplicación API REST de backend desarrollada con Express y una aplicación de frontend desarrollada en Vue.js. Como base de datos se utilizó Google Cloud Spanner (GCS) con 3 nodos de procesamiento con una configuración regional ubicada en us-west.
+
+## Rediseño de la Base de Datos Distribuida de GCS
+
+Modelo lógico inicial
+
+![antes](https://github.com/AlexVelezLl/BDAFlightsProject/blob/master/images/bd-diseno-pasado.png?raw=true)
+
+<br/>
+
+
+Modelo lógico final
+
+![despues](https://github.com/AlexVelezLl/BDAFlightsProject/blob/master/images/bd-diseno.png?raw=true)
+* **Modelo lógico**
+
+Teniendo en cuenta que GCS puede almacenar físicamente los datos de manera jerárquica y que una tabla principal cuenta con tablas secundarias y estas a su vez pueden tener más tablas secundarias, se optó por utilizar esta estructura para el modelo. Se tomó a la entidad Flight como una tabla principal, que tiene a la entidad Booking como su tabla secundaria que ésta a su vez es la tabla principal de la entidad BookingDetail. Esto se realizó debido a que existe una relación de localidad entre las entidades. 
+
+Por ejemplo, si se desea consultar la información sobre un vuelo, se querrá consultar la información de las reservas que tiene su vuelo. De la misma manera si se quiere obtener la información de las reservas se querrá saber los pasajeros pertencientes a dicha reserva, por lo que es más óptimo que físciamente esta información se almacene de manera cercana para reducir los tiempos de consulta. GCS logra esto a través de intercalar los registros de sus tablas relacionadas, como se observa en la siguiente figura:
+
+![ejemplo](https://github.com/AlexVelezLl/BDAFlightsProject/blob/master/images/example.png?raw=true)
+
+Esta estructura requiere que cada tabla secundaria cuente con la clave prrimaria de todos sus antecesores, es por esta razón que la entidad BookingDetail debe tener como clave foranea no solo a la clave primaria de Booking, si no también a la clave primaria de Flight.
+
+* **Claves primarias**
+
+Para la optimización de las lecturas y escrituras en la base, se rediseñó el campo de las claves primarias teniendo lo que dice la [documentación de GCS]:(https://cloud.google.com/spanner/docs/schema-design)
+
+> Una de las causas de los hotspots es tener una columna con un valor que aumenta de forma monotónica como la primera parte de la clave, ya que esto da como resultado que todas las inserciones ocurran al final del espacio de clave. Este patrón no es recomendable porque Cloud Spanner divide los datos entre servidores por rangos de clave, lo que significa que todas tus inserciones se dirigirán a un solo servidor que hará todo el trabajo. 
+
+Para evitar esto, la solución implementada en el proyecto se basa en generar identificadores únicos universales (UUID) como claves primarias de nuestras entidades. De esta forma se logra que los registros se almacenen de forma más esparcida evitando así la creación de hotspots. La versión de UUID utilizada es la versión 4 y esta requiere que sus valores se almacenen en:
+* Una columna STRING(36)
+* Dos columnas INT64
+* Una columna BYTES(16)
+
+La opción escogida para implementar los UUID es la de almacenarlos en una columna de 36 caracteres.
+
 
 ## Documentación de la REST API
 
