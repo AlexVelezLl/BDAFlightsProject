@@ -109,16 +109,23 @@ module.exports.deletePassenger = (id) => {
   return new Promise((resolve, reject) => {
     database.runTransaction(async (err, transaction) => {
       if (err) reject(err);
-      const query = {
-        sql: `
-          DELETE FROM 
-            Passenger
-          WHERE
-            passengerID = @id`,
-        params: { id },
-      };
       try {
-        await transaction.runUpdate(query);
+        await transaction.runUpdate({
+          sql: `
+            DELETE FROM
+              BookingDetail
+            WHERE
+              passengerID = @id`,
+          params: { id }
+        });
+        await transaction.runUpdate({
+          sql: `
+            DELETE FROM 
+              Passenger
+            WHERE
+              passengerID = @id`,
+          params: { id },
+        });
         await transaction.commit();
         resolve();
       } catch (err) {
